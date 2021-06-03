@@ -21,7 +21,6 @@ import java.io.*
 const val EXTRA_USER_MAP = "EXTRA_USER_MAP"
 const val EXTRA_MAP_TITLE = "EXTRA_MAP_TITLE"
 private const val FILENAME = "UserMaps.data"
-private const val REQUEST_CODE = 1234
 private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
 
@@ -91,21 +90,21 @@ class MainActivity : AppCompatActivity() {
             // Navigate to create map activity
             val intent = Intent(this@MainActivity, CreateMapActivity::class.java)
             intent.putExtra(EXTRA_MAP_TITLE, title)
-            startActivityForResult(intent, REQUEST_CODE)
+            resultLauncher.launch(intent)
             dialog.dismiss()
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // Get new map data from the data
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // There are no request codes
+            val data: Intent? = result.data
             val userMap = data?.getSerializableExtra(EXTRA_USER_MAP) as UserMap
             Log.i(TAG, "onActivityResult with new map title ${userMap.title}")
             userMaps.add(userMap)
             mapAdapter.notifyItemInserted(userMaps.size - 1)
             serializeUserMaps(this, userMaps)
         }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun serializeUserMaps(context: Context, userMaps: List<UserMap>) {
